@@ -34,6 +34,11 @@ export default function CameraPage({ navigation }) {
     
   }
 
+  useEffect(() => {
+    requestPermission();
+  }, []);
+  
+
   return (
     <SafeAreaView style={styles.container}>
       <View>

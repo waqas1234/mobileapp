@@ -16,8 +16,8 @@ export default function CameraPage({ navigation }) {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [detecting, setdetecing] = useState(false);
+  const [responseFlask, setResponseFlask] = useState(null);
 
-  const ref = useRef();
   var camera = useRef(null);
 
   const sendVideoFrame = async () => {
@@ -31,7 +31,8 @@ export default function CameraPage({ navigation }) {
         const type = match ? `image/${match[1]}` : `image`;
         const formData = new FormData();
         formData.append("file", { uri: LocalUri, name: filename, type });
-        const response = await fetch("http://192.168.2.105:5000/", {
+        setdetecing(true);
+        const response = await fetch("http://192.168.1.107:5000/", {
           method: "POST",
           body: formData,
           headers: {
@@ -39,11 +40,9 @@ export default function CameraPage({ navigation }) {
           },
         });
         if (response.status === 200) {
-          console.log("success");
-          console.log(response.json().prediction);
+          const data = await response.json();
+          setResponseFlask(data);
           
-          // start sending the next video frame only after the response of previous request has arrived
-          sendVideoFrame();
         } else {
           console.log("error");
         }
@@ -52,6 +51,14 @@ export default function CameraPage({ navigation }) {
       console.log(error);
     }
   };
+  
+  useEffect(() => {
+    console.log(responseFlask);
+    if(camera){
+      sendVideoFrame();
+    }
+  });
+
 
   useEffect(() => {
     requestPermission();
@@ -72,7 +79,7 @@ export default function CameraPage({ navigation }) {
             >
               <TouchableOpacity style={styles.button} onPress={sendVideoFrame}>
                 <Text style={styles.text}>{`${
-                  detecting === true ? "Detecting ..." : "Start Detecting"
+                  responseFlask ? responseFlask.name : detecting === true ? "Detecting ..." : "Start Detecting"
                 }`}</Text>
               </TouchableOpacity>
 

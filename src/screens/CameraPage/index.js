@@ -3,7 +3,6 @@ import { Camera, CameraType } from "expo-camera";
 import CaptureRef from "react-native-view-shot";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import * as Permissions from 'expo-permissions';
 
 import {
   SafeAreaView,
@@ -21,44 +20,38 @@ export default function CameraPage({ navigation }) {
   const ref = useRef();
   var camera = useRef(null);
 
-  function takePicture() {
-    if (camera) {
-      setdetecing(true);
-      const data = async () => {
-        try {
-          const options = { quality: 0.5, base64: true };
-          await camera.takePictureAsync(options).then((picture) => {
-            uri = picture["uri"];
-            let LocalUri = uri;
-            console.log(LocalUri);
-            let filename = LocalUri.split("/").pop();
-            let match = /\.(\w+)$/.exec(filename);
-            let type = match ? `image/${match[1]}` : `image`;
-            let formData = new FormData();
-            formData.append("file", { uri: LocalUri, name: filename, type });
-            console.log(formData);
-            fetch("http://192.168.2.105:5000/", {
-              method: "POST",
-              body: formData,
-              headers: {
-                "content-type": "multipart/form-data",
-              },
-            }).then((response) => {
-              if (response.status === 200) {
-                console.log('success');
-              } else {
-                console.log("error");
-              }
-            });
-              
-          });
-        } catch (error) {
-          console.log(error);
+  const sendVideoFrame = async () => {
+    try {
+      const options = { quality: 0.5, base64: true };
+      await camera.takePictureAsync(options).then(async (picture) => {
+        const uri = picture["uri"];
+        const LocalUri = uri;
+        const filename = LocalUri.split("/").pop();
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : `image`;
+        const formData = new FormData();
+        formData.append("file", { uri: LocalUri, name: filename, type });
+        const response = await fetch("http://192.168.2.105:5000/", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+        });
+        if (response.status === 200) {
+          console.log("success");
+          console.log(response.json().prediction);
+          
+          // start sending the next video frame only after the response of previous request has arrived
+          sendVideoFrame();
+        } else {
+          console.log("error");
         }
-      };
-      return data();
+      });
+    } catch (error) {
+      console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
     requestPermission();
@@ -77,7 +70,7 @@ export default function CameraPage({ navigation }) {
               }}
               style={styles.buttonContainer}
             >
-              <TouchableOpacity style={styles.button} onPress={takePicture}>
+              <TouchableOpacity style={styles.button} onPress={sendVideoFrame}>
                 <Text style={styles.text}>{`${
                   detecting === true ? "Detecting ..." : "Start Detecting"
                 }`}</Text>

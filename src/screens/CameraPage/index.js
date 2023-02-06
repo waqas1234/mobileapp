@@ -16,9 +16,10 @@ export default function CameraPage({ navigation }) {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [detecting, setdetecing] = useState(false);
-
-  const ref = useRef();
+  
   var camera = useRef(null);
+
+  const [apiResponse, setApiResponse] = useState(null);
 
   const sendVideoFrame = async () => {
     try {
@@ -31,19 +32,27 @@ export default function CameraPage({ navigation }) {
         const type = match ? `image/${match[1]}` : `image`;
         const formData = new FormData();
         formData.append("file", { uri: LocalUri, name: filename, type });
-        const response = await fetch("http://192.168.2.105:5000/", {
+        const response = await fetch("http://192.168.1.107:5000/", {
           method: "POST",
           body: formData,
           headers: {
             "content-type": "multipart/form-data",
           },
         });
-        if (response.status === 200) {
-          console.log("success");
-          console.log(response.json().prediction);
+
+        console.log('done');
+        const data = await response.json();
+        setApiResponse(data);
+        
+        if (response) {
+        //   console.log("success");
+        //   console.log(response);
+        //   console.log(response.prediction);
           
-          // start sending the next video frame only after the response of previous request has arrived
+        //   // start sending the next video frame only after the response of previous request has arrived
+         
           sendVideoFrame();
+
         } else {
           console.log("error");
         }
@@ -52,6 +61,8 @@ export default function CameraPage({ navigation }) {
       console.log(error);
     }
   };
+
+  console.log(apiResponse);
 
   useEffect(() => {
     requestPermission();

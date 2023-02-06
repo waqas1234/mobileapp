@@ -24,7 +24,7 @@ export default function CameraPage({ navigation }) {
       const data = async () => {
         try {
           await ref.current.capture().then((uri) => {
-            fetch("https://videorecording.free.beeceptor.com", {
+            fetch("http://192.168.2.105:5000/", {
               method: "POST",
               headers: {
                 Accept: "application/json",
@@ -46,7 +46,6 @@ export default function CameraPage({ navigation }) {
           console.log(error);
         }
       };
-      console.log(Image);
       return data();
     }
   }

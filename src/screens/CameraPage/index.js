@@ -14,14 +14,46 @@ import {
 export default function CameraPage({ navigation }) {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [detecting, setdetecing] = useState(false);
+  const [image, setImage] = useState(null);
 
   const ref = useRef();
 
   function takePicture() {
     if (Camera) {
-      ref.current.capture().then((uri) => {
-        console.log("do something with ", uri);
+      setdetecing(true);
+      const data = async () => {
+        try {
+          await ref.current.capture().then((uri) => {
+            setImage(uri);
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      return data();
+    }
+
+    if (image) {
+      const formData = new FormData();
+      formData.append("image", {
+        uri: image,
+        type: "image/jpg",
+        name: "image.jpg",
       });
+
+      fetch("http://192.168.2.105:5000/", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          // setdetecing(false);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   }
 
@@ -44,7 +76,9 @@ export default function CameraPage({ navigation }) {
               style={styles.buttonContainer}
             >
               <TouchableOpacity style={styles.button} onPress={takePicture}>
-                <Text style={styles.text}>Take Picture</Text>
+                <Text style={styles.text}>{`${
+                  detecting === true ? "Detecting ..." : "Start Detecting"
+                }`}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity

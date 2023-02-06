@@ -3,6 +3,8 @@ import { Camera, CameraType } from "expo-camera";
 import CaptureRef from "react-native-view-shot";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
+import * as Permissions from 'expo-permissions';
+
 import {
   SafeAreaView,
   View,
@@ -17,21 +19,25 @@ export default function CameraPage({ navigation }) {
   const [detecting, setdetecing] = useState(false);
 
   const ref = useRef();
+  var camera = useRef(null);
 
   function takePicture() {
-    if (Camera) {
+    if (camera) {
       setdetecing(true);
       const data = async () => {
         try {
-          await ref.current.capture().then((uri) => {
+          const options = { quality: 0.5, base64: true };
+          await camera.takePictureAsync(options).then((picture) => {
+            uri = picture["uri"];
             let LocalUri = uri;
+            console.log(LocalUri);
             let filename = LocalUri.split("/").pop();
             let match = /\.(\w+)$/.exec(filename);
             let type = match ? `image/${match[1]}` : `image`;
             let formData = new FormData();
             formData.append("file", { uri: LocalUri, name: filename, type });
             console.log(formData);
-            fetch("https://videorecording.free.beeceptor.com", {
+            fetch("http://192.168.2.105:5000/", {
               method: "POST",
               body: formData,
               headers: {
@@ -63,9 +69,8 @@ export default function CameraPage({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View>
         {permission ? (
-          <Camera style={styles.camera} type={type}>
+          <Camera style={styles.camera} type={type} ref={ref => { camera = ref; }}>
             <CaptureRef
-              ref={ref}
               options={{
                 format: "jpg",
                 quality: 0.9,

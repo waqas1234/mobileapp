@@ -24,23 +24,27 @@ export default function CameraPage({ navigation }) {
       const data = async () => {
         try {
           await ref.current.capture().then((uri) => {
-            fetch("http://192.168.2.105:5000/", {
+            let LocalUri = uri;
+            let filename = LocalUri.split("/").pop();
+            let match = /\.(\w+)$/.exec(filename);
+            let type = match ? `image/${match[1]}` : `image`;
+            let formData = new FormData();
+            formData.append("file", { uri: LocalUri, name: filename, type });
+            console.log(formData);
+            fetch("https://videorecording.free.beeceptor.com", {
               method: "POST",
+              body: formData,
               headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
+                "content-type": "multipart/form-data",
               },
-              body: JSON.stringify({
-                image: uri,
-              }),
-            })
-              .then((response) => response.json())
-              .then((json) => {
-                console.log(json);
-              })
-              .catch((error) => {
-                console.error(error);
-              });
+            }).then((response) => {
+              if (response.status === 200) {
+                console.log('success');
+              } else {
+                console.log("error");
+              }
+            });
+              
           });
         } catch (error) {
           console.log(error);
@@ -49,8 +53,6 @@ export default function CameraPage({ navigation }) {
       return data();
     }
   }
-
-  
 
   useEffect(() => {
     requestPermission();

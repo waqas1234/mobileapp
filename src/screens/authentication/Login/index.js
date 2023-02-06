@@ -67,7 +67,12 @@ export default function Login({ navigation }) {
           Forgot Password?
         </Text>
 
-        <Pressable onPress={() => {navigation.navigate("Camera")}} style={styles.LoginScreen.SignInForm.SignInButton}>
+        <Pressable
+          onPress={() => {
+            navigation.navigate("Camera");
+          }}
+          style={styles.LoginScreen.SignInForm.SignInButton}
+        >
           <Text
             style={styles.LoginScreen.SignInForm.SignInButton.SignInButtonText}
           >

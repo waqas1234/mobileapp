@@ -15,29 +15,20 @@ export default function CameraPage({ navigation }) {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
 
-  // ask for permission every time the component is rendered
-
-  function toggleCameraType() {
-    setType((current) =>
-      current === CameraType.back ? CameraType.front : CameraType.back
-    );
-  }
-
   const ref = useRef();
 
   function takePicture() {
-    if(Camera){
+    if (Camera) {
       ref.current.capture().then((uri) => {
         console.log("do something with ", uri);
       });
     }
-    
   }
 
   useEffect(() => {
     requestPermission();
+    setType(CameraType.front);
   }, []);
-  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -52,13 +43,6 @@ export default function CameraPage({ navigation }) {
               }}
               style={styles.buttonContainer}
             >
-              <TouchableOpacity
-                style={styles.button}
-                onPress={toggleCameraType}
-              >
-                <Text style={styles.text}>Flip Camera</Text>
-              </TouchableOpacity>
-
               <TouchableOpacity style={styles.button} onPress={takePicture}>
                 <Text style={styles.text}>Take Picture</Text>
               </TouchableOpacity>
@@ -117,7 +101,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    width: "40%",
+    width: "80%",
     borderRadius: 5,
     backgroundColor: "rgba(0,0,0,0.5)",
     height: 50,

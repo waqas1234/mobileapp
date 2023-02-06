@@ -15,7 +15,6 @@ export default function CameraPage({ navigation }) {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [detecting, setdetecing] = useState(false);
-  const [Image, setImage] = useState(null);
 
   const ref = useRef();
 
@@ -25,34 +24,34 @@ export default function CameraPage({ navigation }) {
       const data = async () => {
         try {
           await ref.current.capture().then((uri) => {
-            setImage(uri);
-          });
-
-          const formData = new FormData();
-            formData.append("image", {
-              uri: Image,
-              type: "image/jpg",
-              name: "image.jpg",
-            });
-            fetch("http://192.168.2.105:5000/", {
+            fetch("https://videorecording.free.beeceptor.com", {
               method: "POST",
-              body: formData,
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                image: uri,
+              }),
             })
               .then((response) => response.json())
-              .then((data) => {
-                console.log(data);
+              .then((json) => {
+                console.log(json);
               })
               .catch((error) => {
-                console.log(error);
+                console.error(error);
               });
-
+          });
         } catch (error) {
           console.log(error);
         }
       };
+      console.log(Image);
       return data();
     }
   }
+
+  
 
   useEffect(() => {
     requestPermission();

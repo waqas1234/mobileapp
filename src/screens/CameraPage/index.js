@@ -3,6 +3,7 @@ import { Camera, CameraType } from "expo-camera";
 import CaptureRef from "react-native-view-shot";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
+import { Audio } from 'expo-av'
 
 import {
   SafeAreaView,
@@ -17,6 +18,20 @@ export default function CameraPage({ navigation }) {
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [detecting, setdetecing] = useState(false);
   const [responseFlask, setResponseFlask] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  async function playSound() {
+    const soundObject = new Audio.Sound();
+    try {
+      await soundObject.loadAsync(require('../../../assets/audio/alarm.wav'));
+      await soundObject.playAsync();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error(error);
+    }
+    
+  }
+
 
   var camera = useRef(null);
 
@@ -42,6 +57,13 @@ export default function CameraPage({ navigation }) {
         if (response.status === 200) {
           const data = await response.json();
           setResponseFlask(data);
+
+          if(data.name === 'Sleeping'){
+              setIsPlaying(false);
+              playSound();
+          }else{
+            setIsPlaying(false);
+          }
           
         } else {
           console.log("error");
@@ -86,6 +108,7 @@ export default function CameraPage({ navigation }) {
               <TouchableOpacity
                 style={styles.Closebutton}
                 onPress={() => {
+                  setIsPlaying(false);
                   navigation.navigate("Home");
                 }}
               >

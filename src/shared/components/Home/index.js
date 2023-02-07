@@ -12,7 +12,7 @@ export default function Home({ navigation }) {
       </View>
       <View style={styles.TextOuter}>
         <Text style={styles.TextOuter.LoginText}>
-          Sign In to record your video
+          Sign In to Start Sleep Detector
         </Text>
         <Text style={styles.TextOuter.TextTagline}>
           Get started with your account
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
 
   LoginBlock: {
     flex: 1,
-    alignItems: "end",
+    alignItems: "flex-end",
     justifyContent: "center",
 
     SignInText: {
